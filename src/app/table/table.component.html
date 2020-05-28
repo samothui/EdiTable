@@ -1,0 +1,68 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+</style>
+
+<h2>HTML Table</h2>
+
+
+<form class="">
+  <div class="">
+      Search table data: <input class="" type="text" [formControl]="filter"/>
+  </div>
+</form>
+<br>
+<table>
+  <tr class="table-title">
+    <th><input type="checkbox" (change)="CheckAllOptions()" [(ngModel)]=mainCheck></th>
+    <th class="arrowAble" sortable="Company" (sort)="onSort($event)">Company</th>
+    <th class="arrowAble" sortable="Contact" (sort)="onSort($event)">Contact</th>
+    <th class="arrowAble" sortable="Country" (sort)="onSort($event)">Country</th>
+  </tr>
+  <tr class="row" *ngFor="let row of tableValues | paginate: {itemsPerPage: 3, currentPage: p};let i = index ">
+    <!-- <td *ngIf="(editRow ==='Company' && i === editIndex) || (row.Company ==='')" (keyup.enter)="ClearEdit()" (keydown.escape)="ClearEdit()"><input class="inlineInput" type="text"  [(ngModel)]="row.Company"></td> -->
+    <!-- <td *ngIf="(editRow !=='Company' && row.Company!=='') || (editRow ==='Company' && i !== editIndex)" (dblclick)="SetEditLocation(i, 0)" (click)="ClearEdit()" >{{row.Company}}</td> -->
+
+    <!-- <td *ngIf="editRow ==='Contact' && i === editIndex" (keyup.enter)="ClearEdit()" (keydown.escape)="ClearEdit()"><input class="inlineInput" type="text"  [(ngModel)]="row.Contact"></td>
+    <td *ngIf="(editRow !=='Contact') || (editRow ==='Contact' && i !== editIndex)" (dblclick)="SetEditLocation(i, 1)" (click)="ClearEdit()" >{{row.Contact}}</td>
+
+    <td *ngIf="editRow ==='Country' && i === editIndex" (keyup.enter)="ClearEdit()" (keydown.escape)="ClearEdit()"><input class="inlineInput" type="text"  [(ngModel)]="row.Country"></td>
+    <td *ngIf="(editRow !=='Country') || (editRow ==='Country' && i !== editIndex)" (dblclick)="SetEditLocation(i, 2)" (click)="ClearEdit()" >{{row.Country}}</td>
+     -->
+    <td><input type="checkbox" (change)="CheckAll()" [(ngModel)]=row.Checked>  </td>
+
+    <td *ngIf="TestMethod('Company',i)" (keyup.enter)="RemoveEditValues('Company', i)" (keydown.escape)="RemoveEditValues('Company', i)"><input class="inlineInput" type="text"  [(ngModel)]="row.Company"></td>
+    <td *ngIf="!TestMethod('Company', i)" (dblclick)="AddEditValues('Company', i)" (click)="RemoveEditValues('Company', i)" >{{row.Company}}</td>
+
+    <td *ngIf="TestMethod('Contact',i)" (keyup.enter)="RemoveEditValues('Contact', i)" (keydown.escape)="RemoveEditValues('Contact', i)"><input class="inlineInput" type="text"  [(ngModel)]="row.Contact"></td>
+    <td *ngIf="!TestMethod('Contact', i)" (dblclick)="AddEditValues('Contact', i)" (click)="RemoveEditValues('Contact', i)" >{{row.Contact}}</td>
+
+    <td *ngIf="TestMethod('Country',i)" (keyup.enter)="RemoveEditValues('Country', i)" (keydown.escape)="RemoveEditValues('Country', i)"><input class="inlineInput" type="text"  [(ngModel)]="row.Country"></td>
+    <td *ngIf="!TestMethod('Country', i)" (dblclick)="AddEditValues('Country', i)" (click)="RemoveEditValues('Country', i)" >{{row.Country}}</td>
+  </tr>
+
+</table>
+<br>
+<button (click)="AddRow()"> Add new row...</button>
+<button (click)="DeleteRow()"> Delete selected rows</button>
+
+<br>
+Total entries: {{tableValues.length}}
+<pagination-controls (pageChange)="p = $event"></pagination-controls>
+<!--
+
+<hr>
+<hr>
+<form [formGroup]="myForm">
+  Value: {{myForm.value | json}}
+
+  <br>
+  <input placeholder="email" formControlName="email">
+  <p *ngIf="email.invalid && email.touched"> Your e-mail does not look right!</p>
+  <input placeholder="message" formControlName="message">
+  <input placeholder="career" formControlName="career">
+  <p *ngIf="career.invalid && career.dirty"> Your career seems off!</p>
+
+  <hr>
+  <p> {{myForm.get('email').value}}</p>
+
+</form> -->

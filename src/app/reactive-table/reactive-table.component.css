@@ -1,0 +1,294 @@
+* {
+  box-sizing:  border-box;
+  font-family: 'Noto Sans';
+}
+
+table {
+  line-height: 2em;
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.inlineInput {
+  width: 75%;
+  line-height: 1.6em;
+  font-size: 1em;
+  font-weight: 700;
+
+}
+
+.row:hover {
+  background-color: #EAEAF2;
+  outline: 2px solid #747480;
+  font-weight: 700;
+}
+
+.table-title {
+  background-color: #2E2E38;
+  color: #FFF;
+}
+
+
+th.arrowAble{
+  cursor:pointer;
+}
+
+th[sortable].desc:after, th[sortable].asc:after{
+  content: '';
+  display: inline-block;
+  background: url(src\assets\Icons\iconfinder-icon.svg) no-repeat;
+  background-size: 22px;
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+
+th[sortable].desc:after {
+    transform: rotate(180deg);
+}
+
+.del {  background: url(https://cdn2.iconfinder.com/data/icons/essential-web-1-1/50/close-cross-error-wrong-reject-512.png) center no-repeat; }
+.edit {  background: url(https://cdn2.iconfinder.com/data/icons/essential-web-3/50/edit-note-pencil-document-write-512.png) center no-repeat; }
+.done {  background: url(https://cdn2.iconfinder.com/data/icons/essential-web-4/50/check-tick-mark-correct-choose-512.png) center no-repeat; }
+
+.icoBtn {
+  background-color: inherit;
+  border: none;
+  display: inline-block;
+  background-size: 1.2em;
+  width: 1.5em;
+  height: 1.9em;
+  vertical-align: middle;
+  margin-left: 5px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.sm{
+  width: 10%;
+  padding: 0;
+  text-align: center;
+}
+
+.xsm{
+  width: 5%;
+  padding: 0;
+}
+
+.checkboxWrapper{
+  text-align: center;
+  vertical-align: middle;
+}
+
+input[type="checkbox"] { display: none; }
+
+input[type="checkbox"] + label {
+
+  display: inline-block;
+  position: relative;
+  padding: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  font: 14px/20px 'Open Sans', Arial, sans-serif;
+  color: #2e2f2f;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+
+input[type="checkbox"] + label:last-child { margin-bottom: 0; }
+
+input[type="checkbox"] + label:before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #2e2f2f;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: .6;
+  -webkit-transition: all .12s, border-color .08s;
+  transition: all .12s, border-color .08s;
+}
+
+input[type="checkbox"] + #mainLabel:before{
+  border: 1px solid white;
+}
+
+
+input[type="checkbox"]:checked + label:before {
+  width: 10px;
+  top: -5px;
+  left: 5px;
+  border-radius: 0;
+  opacity: 1;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+input[type="checkbox"]:checked + #mainLabel:before{
+  border-top-color: #2E2E38;
+  border-left-color: #2E2E38;
+}
+
+input[type="checkbox"]:disabled + #mainLabel:before{
+    display: none;
+}
+
+.highlight.highlight {
+  background-color: rgb(141, 141, 141);
+  color: white
+}
+
+.pagination {
+  margin-right: 6vw;
+}
+
+.my-pagination /deep/ .ngx-pagination .current {
+  background: rgb(141, 141, 141);
+}
+
+.my-pagination /deep/ .ngx-pagination {
+  padding-left: 0;
+}
+
+
+.underTable{
+  padding: 0 5%;
+  background-color: white;
+  border: grey;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  bottom: -1px;
+}
+
+.underTable[stuck]{
+/* .underTable{ */
+  box-shadow: 0px -5px 30px -6px rgba(0,0,0,0.75);
+  border-radius: 5px 5px 0 0;
+
+}
+
+
+.componentWrapper{
+  padding: 2vh 10%;
+}
+
+.overTable{
+  align-items: center;
+  padding: 0.5em 1em;
+  line-height: 2em;
+  position: sticky;
+  top: -1px;
+  z-index: 2;
+  background-color: white;
+  display: flex;
+  /* flex-flow: row wrap; */
+  justify-content: space-between;
+}
+
+.overTable[stuck]{
+  box-shadow: 0px -5px 30px -6px rgba(0,0,0,0.75);
+  border-radius: 0 0 5px 5px;
+}
+
+.searchInput{
+  width: 12em;
+  font-size: 0.8em;
+  background: url(https://cdn2.iconfinder.com/data/icons/essential-web-5/50/search-look-magnify-glass-inspect-512.png) no-repeat;
+  border: 1px solid #ccc;
+  background-size: 1rem;
+  background-color: white;
+  background-position: 10px center;
+  padding: 0.2rem 0.2rem 0.2rem 2.5rem;
+  -webkit-transition: width 0.4s ease-in-out;
+  transition: width 0.4s ease-in-out;
+  font-weight: 500;
+}
+
+.searchInput:focus,  .searchInput:hover{
+  width: 25vw;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.dropdown{
+  font-family: sans-serif;
+
+}
+
+.btn {
+  font-size: 14px;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  margin-left: 0.2em;
+
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+}
+.btn:focus,
+.btn:active:focus {
+  outline: thin dotted;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+.btn:hover,
+.btn:focus {
+  color: #333;
+  text-decoration: none;
+}
+.btn:active {
+  background-image: none;
+  outline: 0;
+  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+}
+
+.btn:disabled{
+  color: rgb(192, 190, 190);
+  cursor: default;
+}
+
+.leftUnderTable{
+  width: 12vw;
+  line-height: 1.1em;
+  font-size: 0.9em;
+  display: flex;
+  flex-flow: column;
+}
