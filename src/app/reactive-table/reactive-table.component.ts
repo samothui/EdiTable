@@ -2,7 +2,6 @@ import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { SortEvent, compare } from '../Interfaces/interface';
 import { SortableHeaderDirective } from '../Directives/sortable-header.directive';
-import { HttpRequestsService } from '../Services/http-requests.service';
 
 @Component({
   selector: 'app-reactive-table',
@@ -44,7 +43,7 @@ export class ReactiveTableComponent implements OnInit {
 
 
   constructor(private fb: FormBuilder,
-              private httpService: HttpRequestsService) { }
+             ) { }
 
   ngOnInit() {
 
@@ -221,10 +220,6 @@ export class ReactiveTableComponent implements OnInit {
     let rowsSelected = 0;
     this.getFormControls.value.map(value => { if (value.Checked) rowsSelected++;})
     return rowsSelected;
-  }
-
-  getData(){
-    this.httpService.get().subscribe((value)=> console.log(value));
   }
 
 }

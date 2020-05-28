@@ -16,7 +16,6 @@
       <button class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()" (click)="editSelectedRows()">Batch edit</button>
       <button class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()"(click)="deleteSelectedRows()">Batch delete</button>
       <button class="btn" [disabled]="userTable.invalid || checkIfEmptyTable()" type="submit" (click)="submitForm()">Submit</button>
-      <button class="btn" (click)="getData()">Get data</button>
 
 
     </div>
