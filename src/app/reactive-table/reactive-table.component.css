@@ -186,7 +186,6 @@ input[type="checkbox"]:disabled + #mainLabel:before{
 }
 
 .underTable[stuck]{
-/* .underTable{ */
   box-shadow: 0px -5px 30px -6px rgba(0,0,0,0.75);
   border-radius: 5px 5px 0 0;
 
@@ -206,7 +205,6 @@ input[type="checkbox"]:disabled + #mainLabel:before{
   z-index: 2;
   background-color: white;
   display: flex;
-  /* flex-flow: row wrap; */
   justify-content: space-between;
 }
 

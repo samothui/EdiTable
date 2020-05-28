@@ -1,19 +1,8 @@
-import { Component, OnInit, QueryList, ViewChildren, ViewChild, ElementRef } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { SortEvent, compare } from '../Interfaces/interface';
 import { SortableHeaderDirective } from '../Directives/sortable-header.directive';
-import { Observable } from 'rxjs/internal/Observable';
-import { map } from 'rxjs/internal/operators/map';
-import { startWith } from 'rxjs/internal/operators/startWith';
-
-// !!!!!!!!!!!!!!!!!
-interface Properties {
-  Company: string,
-  Contact: string,
-  Country: string,
-  isEditable: boolean,
-  Checked: boolean;
-}
+import { HttpRequestsService } from '../Services/http-requests.service';
 
 @Component({
   selector: 'app-reactive-table',
@@ -54,13 +43,13 @@ export class ReactiveTableComponent implements OnInit {
   noSelectCheckboxes = 0;
 
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder,
+              private httpService: HttpRequestsService) { }
 
   ngOnInit() {
 
     this.touchedRows = [];
     this.userTable = this.fb.group({
-      // query: [''],
       tableRows: this.fb.array([])
     });
     this.addDefaultValues();
@@ -68,87 +57,7 @@ export class ReactiveTableComponent implements OnInit {
     this.myBackupSortingArray = this.getFormControls.value;
 
     this.defineStuckState();
-
-    // this.filter.valueChanges
-    // .subscribe (
-    //   (Response) =>
-    //   {
-    //     if (this.filter.value !== ''){
-    //       // this.tableValues = ;
-    //       // console.log(this.filter.value);
-
-    //       let TestArray = this.search(this.filter.value);
-    //       console.log(TestArray);
-    //         // this.getFormControls.controls[0] = TestArray[0];
-    //       console.log(this.getFormControls);
-    //     // } else this.tableValues = this.originalArray;
-      // }});
-
-
-    // FILTER AREAS
-
-      // this.myForm = this._fb.group({
-      //   appname: ['', Validators.required],
-      //   properties: this._fb.array(this._properties.map(p => (this._fb.group({
-      //     key: [p.key, { validators: [Validators.required], updateOn: 'blur' }],
-      //     value: [p.value, { validators: [Validators.required], updateOn: 'blur' }]
-      //   })))),
-      //   query: ['']
-      // });
   }
-//       this.filteredProperties$ = this.userTable.valueChanges.pipe(
-//         map(value => {
-
-//           // in this map I extend the Property type with an index which I need to bind the formControl in the template. this is the index of the FormGroup in the FormArray
-//           if (value.query === '') {
-//             return value.tableRows.map((p, index) => ({ ...p, index }));
-//           }
-//           const queryLower = value.query.toLowerCase();
-//           return value.tableRows.filter(p => p.Company.toLowerCase().includes(queryLower) || p.Contact.toLowerCase().includes(queryLower) || p.Country.toLowerCase().includes(queryLower)).map(p => ({ ...p, index: value.tableRows.indexOf(p) }));
-//         }),
-//         // valueChanges stream only starts after the first change, so use startWith to provide an initial value
-//         startWith(
-//           this.getFormControls.value.map(p => ({ ...p, index: this.getFormControls.value.indexOf(p) }))))
-// // .subscribe( (value) =>
-// //   console.log(value));
-// ;
-//   }
-
-//   filteredProperties$: Observable<Properties>;
-//   // filteredProperties$;
-
-//   // get tableRows(): FormArray {
-//   //   return <FormArray>this.userTable.get('Company');
-//   // }
-
-//   getArrayFormGroup(index: number): FormGroup {
-
-//     return this.getFormControls.at(index) as FormGroup;
-//   }
-
-  // FILTER AREA
-  // filter = new FormControl('');
-  // search(text: string){
-  //   console.log("searching");
-  //   // console.log(this.getFormControls.controls);
-  //   let returnResult = this.getFormControls.controls.filter(it => {
-  //     let term = text.toLowerCase();
-  //     // return entity.value.Company.toLowerCase().includes(term)
-  //     //                 || entity.value.Contact.toLowerCase().includes(term)
-  //     //                 || entity.value.Country.toLowerCase().includes(term);
-  //     // it => {
-  //       if (it.value.Company.toString().toLowerCase().includes(term)) return it.value.Company.toString().toLowerCase().includes(term); else
-  //       if (it.value.Contact.toString().toLowerCase().includes(term)) return it.value.Contact.toString().toLowerCase().includes(term); else
-  //       if (it.value.Country.toString().toLowerCase().includes(term)) return it.value.Country.toString().toLowerCase().includes(term);
-
-  //   });
-  //         // console.log(returnResult);
-  //     return returnResult;
-  // }
-
-// AREA
-
-
 
   initiateForm(): FormGroup {
     return this.fb.group({
@@ -160,7 +69,7 @@ export class ReactiveTableComponent implements OnInit {
       Validators.minLength(3)]],
       Country: ['',
       [Validators.required,
-      Validators.minLength(3)]],
+      Validators.minLength(2)]],
       isEditable: [true],
       Checked: [false]
     });
@@ -185,16 +94,12 @@ export class ReactiveTableComponent implements OnInit {
   }
 
   deleteRow(index: number) {
-    console.log(this.getFormControls.value[index]);
-    console.log(index);
     const control =  this.userTable.get('tableRows') as FormArray;
     control.removeAt(index);
   }
 
   editRow(group: FormGroup) {
     group.get('isEditable').setValue(true);
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WARNING
-    this.doSomething();
   }
 
   doneRow(group: FormGroup) {
@@ -263,8 +168,7 @@ export class ReactiveTableComponent implements OnInit {
   }
 
   checkIfNoCheckbox(){
-  // !! EFFICIENCY: this fires way too many times
-
+  // !! EFFICIENCY Problem: this fires way too many times
     this.noSelectCheckboxes = 0
     this.getFormControls.value.map(val => {if (val.Checked === true) this.noSelectCheckboxes++;});
     if (this.noSelectCheckboxes >0 )return false;
@@ -273,9 +177,7 @@ export class ReactiveTableComponent implements OnInit {
 
   @ViewChildren (SortableHeaderDirective) headers: QueryList<SortableHeaderDirective>;
 
-
   onSort({column, direction}: SortEvent) {
-    // resetting other headers
     this.headers.forEach(header => {
       if (header.sortable !== column) {
         header.direction = '';
@@ -292,8 +194,8 @@ export class ReactiveTableComponent implements OnInit {
     }
   }
 
+  // Workaround for position: sticky theoretical state of 'stuck'
   defineStuckState(){
-    // Workaround for position: sticky theoretical state of 'stuck'
    const observer = new IntersectionObserver(
       ([e]) => e.target.toggleAttribute('stuck', e.intersectionRatio < 1),
       {threshold: [1]}
@@ -321,33 +223,8 @@ export class ReactiveTableComponent implements OnInit {
     return rowsSelected;
   }
 
-  editablePositions = [];
-
-  doSomething(){
-
-    // let editableGroups = this.getFormControls.controls.filter(group => group.value.isEditable === true);
-    // console.log(editableGroups);
-
-    // group.get('isEditable').value
-
-    // let editablePositions = [];
-    this.editablePositions =[];
-     this.getFormControls.controls.forEach((group,index) => {
-      if (group.value.isEditable) this.editablePositions.push(index);
-        })
-    console.log(this.editablePositions);
-    // this.getFormControls.controls.map(group => {
-    //    console.log(group.value.isEditable);})
-
+  getData(){
+    this.httpService.get().subscribe((value)=> console.log(value));
   }
 
-  position = 0;
-
-  returnFirstEditPosition (){
-    console.log("I fired!");
-    this.position = this.editablePositions[0];
-    this.editablePositions.shift();
-    console.log(this.editablePositions);
-    return this.position;
-  }
 }
