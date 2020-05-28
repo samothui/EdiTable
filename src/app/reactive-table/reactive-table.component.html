@@ -1,0 +1,120 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+</style>
+
+
+<div class="componentWrapper">
+<header>
+  <div>
+    <h1>Inline Editable Table</h1>
+  </div>
+</header>
+
+
+<div class="overTable">
+    <form class="searchForm">
+       <input class="inlineInput searchInput" placeholder="Search table..." [(ngModel)]="searchText" [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()">
+       <!-- <input class="inlineInput searchInput" placeholder="Search table..." id="query" type="text" class="form-control" formControlName="query"> -->
+      </form>
+    <div class="action-container">
+      <button class="btn" (click)="addRow()">Add row</button>
+      <button class="btn" *ngIf="!checkIfNoCheckbox()" (click)="clearSelection()"  >Clear Selection</button>
+      <button class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()" (click)="editSelectedRows()">Batch edit</button>
+      <button class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()"(click)="deleteSelectedRows()">Batch delete</button>
+      <button class="btn" [disabled]="userTable.invalid || checkIfEmptyTable()" type="submit" (click)="submitForm()">Submit</button>
+      <button class="btn" (click)="doSomething()">Do something!</button>
+
+    </div>
+</div>
+
+
+<form [formGroup]="userTable">
+
+<table>
+  <thead>
+    <tr class="table-title">
+      <th class="xsm"><div class="checkboxWrapper"><input type="checkbox" (change)="checkAllBoxes()" [(ngModel)]=mainCheck [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()" id="mainBox"><label id="mainLabel" for="mainBox"></label></div></th>
+      <th class="arrowAble" sortable="Company" (sort)="onSort($event)"> Company</th>
+      <th class="arrowAble" sortable="Contact" (sort)="onSort($event)"> Contact</th>
+      <th class="arrowAble" sortable="Country" (sort)="onSort($event)"> Country</th>
+      <th class="sm"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls | formArrayFilterPipe: searchText | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page} ; let i=index">
+      <!-- <ng-container formArrayName="tableRows" *ngFor="let group of filteredProperties$ |async | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page} ; let i=index">
+        <tr class="row" >
+        <td><div class="checkboxWrapper"><input type="checkbox" id="box-{{(page-1)*selectedItemsPerPage+i}}"  (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label></div></td>
+        <td>
+          <input class="inlineInput" type="text" [formControl]="getArrayFormGroup(i).get('Company')" (keydown.Enter)="doSomething()">
+        </td>
+
+      </tr> -->
+
+
+      <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="[(page-1)*selectedItemsPerPage+i]" [ngClass]="{'highlight': group.get('Checked').value===true}">
+        <!-- <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="returnFirstEditPosition()" [ngClass]="{'highlight': group.get('Checked').value===true}"> -->
+
+
+        <td><div class="checkboxWrapper"><input type="checkbox" id="box-{{(page-1)*selectedItemsPerPage+i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label></div></td>
+        <td>
+          <input class="inlineInput" type="text" formControlName="Company" (keydown.Enter)="doSomething()">
+        </td>
+        <td>
+          <input class="inlineInput" type="text" formControlName="Contact">
+        </td>
+        <td>
+          <input class="inlineInput" type="text" formControlName="Country">
+        </td>
+        <td class="sm">
+          <button class="icoBtn done"(click)="doneRow(group)"></button>
+        </td>
+
+      <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="[(page-1)*selectedItemsPerPage+i]" [ngClass]="{'highlight': group.get('Checked').value===true}">
+
+        <td>
+          <div class="checkboxWrapper">
+            <input type="checkbox" formControlName="Checked" id="box-{{(page-1)*selectedItemsPerPage+i}}" (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label>
+          </div></td>
+          <td>
+          {{group.get('Company').value}}
+        </td>
+        <td>
+          {{group.get('Contact').value}}
+        </td>
+        <td>
+          {{group.get('Country').value}}
+        </td>
+        <td class="sm">
+            <button class="icoBtn edit"(click)="editRow(group)"></button>
+            <button class="icoBtn del" (click)="deleteRow(i)"></button>
+        </td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>
+</form>
+<div class="underTable">
+  <div class="leftUnderTable">
+    <span>{{getFormControls.value.length}} total entries</span>
+    <span *ngIf="getRowsSelected()>0">{{getRowsSelected()}} rows selected</span>
+    <span *ngIf="getRowsPendingEdit()>0">{{getRowsPendingEdit()}} rows pending edit</span>
+  </div>
+
+  <div class="pagination">
+    <pagination-controls class="my-pagination" (pageChange)="page = $event"></pagination-controls>
+  </div>
+
+  <div class="rightUnderTable">
+    <select  type="number" [(ngModel)]="selectedItemsPerPage" [ngModelOptions]="{standalone: true}">
+      <option class="dropdown" *ngFor="let item of itemsPerPage" [ngValue]="item">{{item}} items per page</option>
+    </select>
+  </div>
+</div>
+
+
+<hr><hr>
+
+Invalid: {{userTable.invalid | json}}
+
+</div>
