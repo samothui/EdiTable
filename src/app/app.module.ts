@@ -9,6 +9,7 @@ import { TitleCasePipe, LowerCasePipe } from '@angular/common';
 import {NgxPaginationModule} from 'ngx-pagination'; // <--- external package
 import { ReactiveTableComponent } from './reactive-table/reactive-table.component';
 import { FormArrayFilterPipe } from './form-array-filter-pipe.pipe';
+import {HttpClientModule} from '@angular/common/http'
 
 
 
@@ -24,6 +25,7 @@ import { FormArrayFilterPipe } from './form-array-filter-pipe.pipe';
     FormsModule,
     ReactiveFormsModule,
     NgxPaginationModule,
+    HttpClientModule
   ],
   providers: [TitleCasePipe, LowerCasePipe],
   bootstrap: [AppComponent]

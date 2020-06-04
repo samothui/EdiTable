@@ -1,7 +1,8 @@
 import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { SortEvent, compare } from '../Interfaces/interface';
+import { SortEvent, compare, PutDTO } from '../Interfaces/interface';
 import { SortableHeaderDirective } from '../Directives/sortable-header.directive';
+import { HttpService } from '../Services/http-service.service';
 
 @Component({
   selector: 'app-reactive-table',
@@ -14,52 +15,84 @@ export class ReactiveTableComponent implements OnInit {
   control: FormArray;
   mode: boolean;
   touchedRows: any;
-  tableValues = [
-    {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
-    {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
-    {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
-    {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
-    {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
-    {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"},
-    {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
-    {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
-    {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
-    {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
-    {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
-    {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"},
-    {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
-    {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
-    {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
-    {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
-    {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
-    {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"}]
+  tableValues = [];
+    // {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
+    // {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
+    // {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
+    // {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
+    // {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
+    // {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"},
+    // {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
+    // {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
+    // {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
+    // {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
+    // {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
+    // {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"},
+    // {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
+    // {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
+    // {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
+    // {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
+    // {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
+    // {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"}]
   searchText: String = '';
   page: number = 1;
   itemsPerPage: Array<number> = [5,10,15,20,30,50];
-  selectedItemsPerPage: number = 20;
+  selectedItemsPerPage: number = 5;
   mainCheck = false;
   myBackupSortingArray =[];
   noSelectCheckboxes = 0;
+  contentLoaded = false;
 
-
-  constructor(private fb: FormBuilder,
+  constructor(
+    private fb: FormBuilder,
+    private httpService: HttpService
              ) { }
 
   ngOnInit() {
+    this.initiateForm(this.selectedItemsPerPage);
 
-    this.touchedRows = [];
-    this.userTable = this.fb.group({
-      tableRows: this.fb.array([])
-    });
-    this.addDefaultValues();
-
-    this.myBackupSortingArray = this.getFormControls.value;
-
-    this.defineStuckState();
   }
 
-  initiateForm(): FormGroup {
-    return this.fb.group({
+  initiateForm(noOfItems: number){
+    // TO DO!!!!!!!!!!!!!!!!!!!!11
+    this.httpService.getData('','asc', this.page, this.selectedItemsPerPage).subscribe(
+      (value: []) => {
+
+        this.tableValues = [];
+        value.forEach(el => this.tableValues.push(el))
+        this.touchedRows = [];
+        this.userTable = this.fb.group({
+          tableRows: this.fb.array([])
+        });
+        this.addDefaultValues();
+
+        this.myBackupSortingArray = this.getFormControls.value;
+
+        this.contentLoaded = true;
+        // this.defineStuckState();
+
+        console.log(this.userTable);
+      });
+  }
+
+  addDefaultValues(){
+    const control =  this.userTable.get('tableRows') as FormArray;
+    for (let i = 0; i < this.tableValues.length; i ++){
+      control.push(this.fb.group({
+        Id: [this.tableValues[i].id],
+        Company: [this.tableValues[i].company, [Validators.required, Validators.minLength(3)]],
+        Contact: [this.tableValues[i].contact, [Validators.required, Validators.minLength(3)]],
+        Country: [this.tableValues[i].country, [Validators.required, Validators.minLength(3)]],
+        isEditable: false,
+        Checked: false,
+        }));
+    }
+  }
+
+  addRow() {
+    const control =  this.userTable.get('tableRows') as FormArray;
+    control.push(this.fb.group({
+      Id: [],
       Company: ['',
       [Validators.required,
       Validators.minLength(3)]],
@@ -71,29 +104,19 @@ export class ReactiveTableComponent implements OnInit {
       Validators.minLength(2)]],
       isEditable: [true],
       Checked: [false]
-    });
+    }));
   }
 
-  addDefaultValues(){
-    const control =  this.userTable.get('tableRows') as FormArray;
-    for (let i = 0; i < this.tableValues.length; i ++){
-      control.push(this.fb.group({
-        Company: [this.tableValues[i].Company, [Validators.required, Validators.minLength(3)]],
-        Contact: [this.tableValues[i].Contact, [Validators.required, Validators.minLength(3)]],
-        Country: [this.tableValues[i].Country, [Validators.required, Validators.minLength(3)]],
-        isEditable: false,
-        Checked: false,
-        }));
-    }
-  }
-
-  addRow() {
-    const control =  this.userTable.get('tableRows') as FormArray;
-    control.push(this.initiateForm());
-  }
+  // deleteRow(index: number) {
+  //   const control =  this.userTable.get('tableRows') as FormArray;
+  //   console.log(control.controls[index].value.Id)
+  //   // control.removeAt(index);
+  // }
 
   deleteRow(index: number) {
     const control =  this.userTable.get('tableRows') as FormArray;
+    const delId = control.controls[index].value.Id;
+    this.httpService.deleteRow(delId).subscribe(console.log);
     control.removeAt(index);
   }
 
@@ -101,8 +124,21 @@ export class ReactiveTableComponent implements OnInit {
     group.get('isEditable').setValue(true);
   }
 
-  doneRow(group: FormGroup) {
+  doneRow(group: FormGroup, index: number) {
     group.get('isEditable').setValue(false);
+    const control =  this.userTable.get('tableRows') as FormArray;
+    const editId = control.controls[index].value.Id;
+    console.log(control.controls[control.controls.length-2].value.Id)
+    // if (group.value.Id === null) console.log("last id: "+ );
+
+    const tableEntry: PutDTO = {
+      id: group.value.Id,
+      company: group.value.Company,
+      contact: group.value.Contact,
+      country: group.value.Country
+    }
+    console.log(tableEntry, editId);
+    // this.httpService.editRow(editId, tableEntry).subscribe(console.log);
   }
 
   saveUserDetails() {
@@ -140,7 +176,7 @@ export class ReactiveTableComponent implements OnInit {
       if (this.getFormControls.value[i].Checked && !this.getFormControls.value[i].isEditable){
         this.editRow(form);
       } else if (this.getFormControls.value[i].Checked && this.getFormControls.value[i].isEditable){
-        this.doneRow(form);
+        this.doneRow(form, i);
       }
     }
   }
@@ -168,7 +204,7 @@ export class ReactiveTableComponent implements OnInit {
 
   checkIfNoCheckbox(){
   // !! EFFICIENCY Problem: this fires way too many times
-    this.noSelectCheckboxes = 0
+    this.noSelectCheckboxes = 0;
     this.getFormControls.value.map(val => {if (val.Checked === true) this.noSelectCheckboxes++;});
     if (this.noSelectCheckboxes >0 )return false;
     else return true;
@@ -193,7 +229,7 @@ export class ReactiveTableComponent implements OnInit {
     }
   }
 
-  // Workaround for position: sticky theoretical state of 'stuck'
+  // Workaround for "position: sticky" theoretical state of 'stuck'
   defineStuckState(){
    const observer = new IntersectionObserver(
       ([e]) => e.target.toggleAttribute('stuck', e.intersectionRatio < 1),
@@ -222,4 +258,9 @@ export class ReactiveTableComponent implements OnInit {
     return rowsSelected;
   }
 
+  onOptionSelect(){
+    if (this.selectedItemsPerPage !== this.tableValues.length){
+      this.initiateForm(this.selectedItemsPerPage)
+    }
+  }
 }
