@@ -6,3 +6,16 @@ export interface SortEvent {
   column: string;
   direction: SortDirection;
 }
+
+export interface PutDTO {
+  id: number
+  company: string,
+  contact: string,
+  country: string
+}
+
+export interface PostDTO {
+  company: string,
+  contact: string,
+  country: string
+}
