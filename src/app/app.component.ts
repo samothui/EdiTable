@@ -7,4 +7,10 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'EdiTable';
+
+  columns = ['Company', 'Contact', 'Country']
+
+  doSomething(event){
+    console.log(event);
+  }
 }

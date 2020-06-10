@@ -1,6 +1,6 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChildren, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { SortEvent, compare, PutDTO } from '../Interfaces/interface';
+import { SortEvent, compare, PutDTO, PostDTO } from '../Interfaces/interface';
 import { SortableHeaderDirective } from '../Directives/sortable-header.directive';
 import { HttpService } from '../Services/http-service.service';
 
@@ -34,7 +34,7 @@ export class ReactiveTableComponent implements OnInit {
     // {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
     // {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
     // {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"}]
-  searchText: String = '';
+  searchText: string = '';
   page: number = 1;
   itemsPerPage: Array<number> = [5,10,15,20,30,50];
   selectedItemsPerPage: number = 5;
@@ -42,6 +42,11 @@ export class ReactiveTableComponent implements OnInit {
   myBackupSortingArray =[];
   noSelectCheckboxes = 0;
   contentLoaded = false;
+  tableEntriesCount = 0;
+  sortingDirection = '';
+  sortingHeader = '';
+  @Input() columns: Array<string> = [];
+  @Output() newRow: EventEmitter<string> = new EventEmitter<string>();
 
   constructor(
     private fb: FormBuilder,
@@ -49,29 +54,31 @@ export class ReactiveTableComponent implements OnInit {
              ) { }
 
   ngOnInit() {
-    this.initiateForm(this.selectedItemsPerPage);
+    this.initiateForm();
 
   }
 
-  initiateForm(noOfItems: number){
+  initiateForm(){
     // TO DO!!!!!!!!!!!!!!!!!!!!11
-    this.httpService.getData('','asc', this.page, this.selectedItemsPerPage).subscribe(
-      (value: []) => {
-
+    this.httpService.getData(this.searchText,this.sortingDirection, this.sortingHeader, this.page, this.selectedItemsPerPage).subscribe(
+      (value: any) => {
+        this.tableEntriesCount = value.itemsCount;
+        console.log("sorting:" + this.sortingDirection);
+        console.log("column:" + this.sortingHeader);
         this.tableValues = [];
-        value.forEach(el => this.tableValues.push(el))
+        value.tableValuesDTOs.forEach(el => this.tableValues.push(el))
         this.touchedRows = [];
         this.userTable = this.fb.group({
           tableRows: this.fb.array([])
         });
         this.addDefaultValues();
+        this.checkAll();
 
         this.myBackupSortingArray = this.getFormControls.value;
 
         this.contentLoaded = true;
-        // this.defineStuckState();
+        this.defineStuckState();
 
-        console.log(this.userTable);
       });
   }
 
@@ -105,6 +112,8 @@ export class ReactiveTableComponent implements OnInit {
       isEditable: [true],
       Checked: [false]
     }));
+
+    this.newRow.emit("Acesta este randul meu");
   }
 
   // deleteRow(index: number) {
@@ -118,6 +127,7 @@ export class ReactiveTableComponent implements OnInit {
     const delId = control.controls[index].value.Id;
     this.httpService.deleteRow(delId).subscribe(console.log);
     control.removeAt(index);
+    this.tableEntriesCount-- ;
   }
 
   editRow(group: FormGroup) {
@@ -125,20 +135,40 @@ export class ReactiveTableComponent implements OnInit {
   }
 
   doneRow(group: FormGroup, index: number) {
+    if (group.get('isEditable').parent.status === "VALID") {
+      if (group.value.Id !== null) {
+        this.editEntryDB(group, index);
+      } else {
+        this.addEntryDB(group)
+      }
+
+    } else alert ("The row you are trying to edit contains invalid values");
+  }
+
+  editEntryDB(group: FormGroup, index: number){
     group.get('isEditable').setValue(false);
     const control =  this.userTable.get('tableRows') as FormArray;
     const editId = control.controls[index].value.Id;
-    console.log(control.controls[control.controls.length-2].value.Id)
-    // if (group.value.Id === null) console.log("last id: "+ );
-
     const tableEntry: PutDTO = {
       id: group.value.Id,
       company: group.value.Company,
       contact: group.value.Contact,
       country: group.value.Country
     }
-    console.log(tableEntry, editId);
-    // this.httpService.editRow(editId, tableEntry).subscribe(console.log);
+    this.httpService.editRow(editId, tableEntry).subscribe();
+  }
+
+  addEntryDB(group: FormGroup){
+      group.get('isEditable').setValue(false);
+      const tableEntry: PostDTO = {
+        company: group.value.Company,
+        contact: group.value.Contact,
+        country: group.value.Country
+      }
+      this.httpService.postRow(tableEntry).subscribe((value:any) =>{
+        group.get('Id').setValue(value.id);
+        this.tableEntriesCount++;
+      });
   }
 
   saveUserDetails() {
@@ -213,31 +243,38 @@ export class ReactiveTableComponent implements OnInit {
   @ViewChildren (SortableHeaderDirective) headers: QueryList<SortableHeaderDirective>;
 
   onSort({column, direction}: SortEvent) {
+    this.sortingDirection = direction;
+    this.sortingHeader = column;
+
     this.headers.forEach(header => {
       if (header.sortable !== column) {
         header.direction = '';
       }
     });
-    let myArray = this.getFormControls.value;
-    myArray = [...myArray].sort((a, b) => {
-      const res = compare(a[column], b[column]);
-      return direction === 'asc' ? res : -res;
-    });
-    this.getFormControls.patchValue(myArray);
-    if (direction === "") {
-      this.getFormControls.patchValue(this.myBackupSortingArray);
-    }
+
+    this.initiateForm();
+
+    // let myArray = this.getFormControls.value;
+    // myArray = [...myArray].sort((a, b) => {
+    //   const res = compare(a[column], b[column]);
+    //   return direction === 'asc' ? res : -res;
+    // });
+    // this.getFormControls.patchValue(myArray);
+    // if (direction === "") {
+    //   this.getFormControls.patchValue(this.myBackupSortingArray);
+    // }
   }
 
   // Workaround for "position: sticky" theoretical state of 'stuck'
   defineStuckState(){
-   const observer = new IntersectionObserver(
-      ([e]) => e.target.toggleAttribute('stuck', e.intersectionRatio < 1),
-      {threshold: [1]}
-    );
-    observer.observe(document.querySelector('.overTable'));
-    observer.observe(document.querySelector('.underTable'));
-
+    setTimeout(function(){
+      const observer = new IntersectionObserver(
+        ([e]) => e.target.toggleAttribute('stuck', e.intersectionRatio < 1),
+        {threshold: [1]}
+      );
+      observer.observe(document.querySelector('.overTable'));
+      observer.observe(document.querySelector('.underTable'));
+    }, 1000)
   }
 
   clearSelection(){
@@ -260,7 +297,17 @@ export class ReactiveTableComponent implements OnInit {
 
   onOptionSelect(){
     if (this.selectedItemsPerPage !== this.tableValues.length){
-      this.initiateForm(this.selectedItemsPerPage)
+      this.initiateForm()
     }
+  }
+
+  isValid(group: FormGroup, formControlName: string) {
+    let controlToCheck = group.get(formControlName);
+    if (controlToCheck.invalid && (controlToCheck.dirty || controlToCheck.touched))
+    {return false;}
+    else return true;
+    // console.log(group);
+    // return this.getFormControls.controls[index].get("Company"); }
+
   }
 }

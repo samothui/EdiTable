@@ -8,7 +8,10 @@
 
 <div class="overTable">
     <form class="searchForm">
-       <input class="inlineInput searchInput" placeholder="Search table..." [(ngModel)]="searchText" [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()">
+       <input class="inlineInput searchInput" placeholder="Search table..." [(ngModel)]="searchText" [ngModelOptions]="{standalone: true}">
+       <button class="btn" (click)="initiateForm()" (keydown.enter)="initiateForm()">Search</button>
+       <button class="btn" (click)="[searchText = '', initiateForm()]" >Reset</button>
+
       </form>
     <div class="action-container">
       <button class="btn" (click)="addRow()">Add row</button>
@@ -16,7 +19,7 @@
       <button class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()" (click)="editSelectedRows()">Batch edit</button>
       <button class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()"(click)="deleteSelectedRows()">Batch delete</button>
       <button class="btn" [disabled]="userTable.invalid || checkIfEmptyTable()" type="submit" (click)="submitForm()">Submit</button>
-      <button class="btn" >Get data</button>
+      <!-- <button class="btn" (click)="getStatus(group, i)">Get data</button> -->
 
 
 
@@ -30,32 +33,38 @@
   <thead>
     <tr class="table-title">
       <th class="xsm"><div class="checkboxWrapper"><input type="checkbox" (change)="checkAllBoxes()" [(ngModel)]=mainCheck [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()" id="mainBox"><label id="mainLabel" for="mainBox"></label></div></th>
-      <th class="arrowAble" sortable="Company" (sort)="onSort($event)"> Company</th>
+      <th class="arrowAble" *ngFor="let column of columns" sortable="{{column}}" (sort)="onSort($event)">{{column}}</th>
+      <!-- PROBLEM - nu se pune arrow - din cauza sortable="{{column}}" - sortable="Company" e ok -->
+
+      <!-- <th class="arrowAble asc" sortable="Company" (sort)="onSort($event)"> Company</th>
       <th class="arrowAble" sortable="Contact" (sort)="onSort($event)"> Contact</th>
-      <th class="arrowAble" sortable="Country" (sort)="onSort($event)"> Country</th>
-      <th class="sm"></th>
+      <th class="arrowAble" sortable="Country" (sort)="onSort($event)"> Country</th> -->
+      <th class="sm" ></th>
     </tr>
   </thead>
   <tbody>
-    <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls | formArrayFilterPipe: searchText | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page} ; let i=index">
+    <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page, totalItems: tableEntriesCount} ; let i=index">
 
-      <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="[(page-1)*selectedItemsPerPage+i]" [ngClass]="{'highlight': group.get('Checked').value===true}">
-
-        <td><div class="checkboxWrapper"><input type="checkbox" id="box-{{(page-1)*selectedItemsPerPage+i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label></div></td>
+      <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
+        <!-- id="box-{{(page-1)*selectedItemsPerPage+i}}" -->
+        <td><div class="checkboxWrapper"><input type="checkbox" id="box-{{i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{i}}"></label></div></td>
         <td>
           <input class="inlineInput" type="text" formControlName="Company">
+            <div *ngIf="!isValid(group, 'Company')" class="invalidError">Company name is invalid</div>
         </td>
         <td>
           <input class="inlineInput" type="text" formControlName="Contact">
+          <div *ngIf="!isValid(group, 'Contact')" class="invalidError">Contact name is invalid</div>
         </td>
         <td>
           <input class="inlineInput" type="text" formControlName="Country">
+          <div *ngIf="!isValid(group, 'Country')" class="invalidError">Country name is invalid</div>
         </td>
         <td class="sm">
           <button class="icoBtn done"(click)="doneRow(group, i)"></button>
         </td>
-
-      <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="[(page-1)*selectedItemsPerPage+i]" [ngClass]="{'highlight': group.get('Checked').value===true}">
+        <!-- [(page-1)*selectedItemsPerPage+i] -->
+      <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
 
         <td>
           <div class="checkboxWrapper">
@@ -81,13 +90,13 @@
 </form>
 <div class="underTable">
   <div class="leftUnderTable">
-    <span>{{getFormControls.value.length}} total entries</span>
+    <span>{{tableEntriesCount}} total entries</span>
     <span *ngIf="getRowsSelected()>0">{{getRowsSelected()}} rows selected</span>
     <span *ngIf="getRowsPendingEdit()>0">{{getRowsPendingEdit()}} rows pending edit</span>
   </div>
 
   <div class="pagination">
-    <pagination-controls class="my-pagination" (pageChange)="page = $event"></pagination-controls>
+    <pagination-controls class="my-pagination" (pageChange)="page = $event" (pageChange) = "initiateForm()"></pagination-controls>
   </div>
 
   <div class="rightUnderTable">

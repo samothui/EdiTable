@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map } from 'rxjs/operators'
-import { PutDTO } from '../Interfaces/interface';
+import { PutDTO, PostDTO } from '../Interfaces/interface';
 
 
 @Injectable({
@@ -13,12 +13,13 @@ export class HttpService {
     private http: HttpClient
   ){}
 
-  getData(filter: string, sortOrder: string, pageNumber: number, pageSize: number){
+  getData(filter: string, sortOrder: string, sortHeader: string, pageNumber: number, pageSize: number){
     const url = 'https://localhost:44363/api/Initial_Values/byParams'
     return this.http.get(url, {
       params: new HttpParams()
       .set('filter', filter)
       .set('sortOrder', sortOrder)
+      .set('sortHeader', sortHeader)
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString())
 
@@ -34,5 +35,10 @@ export class HttpService {
   editRow(id: number, value: PutDTO){
     const url = 'https://localhost:44363/api/Initial_Values/'
     return this.http.put(url+id, value);
+  }
+
+  postRow(value: PostDTO){
+    const url = 'https://localhost:44363/api/Initial_Values/'
+    return this.http.post(url, value);
   }
 }

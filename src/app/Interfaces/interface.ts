@@ -13,3 +13,9 @@ export interface PutDTO {
   contact: string,
   country: string
 }
+
+export interface PostDTO {
+  company: string,
+  contact: string,
+  country: string
+}
