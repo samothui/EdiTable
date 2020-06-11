@@ -4,6 +4,7 @@
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
   --Checkbox-size: 1em;
+  --ThColor: rgb(116, 116, 116);
 }
 
 table {
@@ -38,7 +39,7 @@ tr:nth-child(even) {
 }
 
 .table-title {
-  background-color: rgb(98, 98, 98);
+  background-color: var(--ThColor);
   color: #FFF;
 }
 
@@ -65,6 +66,11 @@ th[sortable].desc:after {
 .del {  background: url(https://cdn2.iconfinder.com/data/icons/essential-web-1-1/50/close-cross-error-wrong-reject-512.png) center no-repeat; }
 .edit {  background: url(https://cdn2.iconfinder.com/data/icons/essential-web-3/50/edit-note-pencil-document-write-512.png) center no-repeat; }
 .done {  background: url(https://cdn2.iconfinder.com/data/icons/essential-web-4/50/check-tick-mark-correct-choose-512.png) center no-repeat; }
+
+.icoBtnWrapper{
+  display: inline-block;
+  margin-right: auto;
+}
 
 .icoBtn {
   background-color: inherit;
@@ -138,8 +144,8 @@ input[type="checkbox"]:checked + label:before {
 }
 
 input[type="checkbox"]:checked + #mainLabel:before{
-  border-top-color: #2E2E38;
-  border-left-color: #2E2E38;
+  border-top-color: var(--ThColor);
+  border-left-color: var(--ThColor);
 }
 
 input[type="checkbox"]:disabled + #mainLabel:before{
@@ -147,7 +153,7 @@ input[type="checkbox"]:disabled + #mainLabel:before{
 }
 
 .highlight.highlight {
-  background-color: rgb(141, 141, 141);
+  background-color: rgb(177, 177, 177);
   color: white
 }
 
@@ -201,13 +207,17 @@ input[type="checkbox"]:disabled + #mainLabel:before{
   justify-content: space-between;
 }
 
+.actionContainer{
+  margin-left: auto;
+}
+
 .overTable[stuck]{
   box-shadow: 0px -5px 30px -6px rgba(0,0,0,0.75);
   border-radius: 0 0 5px 5px;
 }
 
 .searchInput{
-  width: 12em;
+  width: 100%;
   font-size: 0.8em;
   background: url(https://cdn2.iconfinder.com/data/icons/essential-web-5/50/search-look-magnify-glass-inspect-512.png) no-repeat;
   border: 1px solid #ccc;
@@ -221,10 +231,7 @@ input[type="checkbox"]:disabled + #mainLabel:before{
 }
 
 .searchInput:focus,  .searchInput:hover{
-  width: 25vw;
-  border: 2px solid #ccc;
   border-radius: 4px;
-  font-weight: 700;
 }
 
 .dropdown{

@@ -13,11 +13,12 @@ export class HttpService {
     private http: HttpClient
   ){}
 
-  getData(filter: string, sortOrder: string, sortHeader: string, pageNumber: number, pageSize: number){
+  getData(filter: string, filterColumn:string, sortOrder: string, sortHeader: string, pageNumber: number, pageSize: number){
     const url = 'https://localhost:44363/api/Initial_Values/byParams'
     return this.http.get(url, {
       params: new HttpParams()
       .set('filter', filter)
+      .set('filterColumn', filterColumn)
       .set('sortOrder', sortOrder)
       .set('sortHeader', sortHeader)
       .set('pageNumber', pageNumber.toString())

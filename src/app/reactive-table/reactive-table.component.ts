@@ -16,28 +16,11 @@ export class ReactiveTableComponent implements OnInit {
   mode: boolean;
   touchedRows: any;
   tableValues = [];
-    // {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
-    // {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
-    // {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
-    // {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
-    // {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
-    // {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"},
-    // {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
-    // {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
-    // {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
-    // {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
-    // {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
-    // {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"},
-    // {Company: "Alfreds Futterkiste", Contact: "Maria Anders", Country: "Germany"},
-    // {Company: "Magazzini Alimentari Riuniti",Contact: "Giovanni Rovelli",Country: "Italy"},
-    // {Company: "Centro comercial Moctezuma",Contact: "Francisco Chang",Country: "Mexico"},
-    // {Company: "Ernst Handel", Contact: "Roland Mendel", Country: "Austria"},
-    // {Company: "Island Trading",Contact: "Helen Bennett",Country: "UK"},
-    // {Company: "Laughing Bacchus Winecellars",Contact: "Yoshi Tannamuri",Country: "Canada"}]
-  searchText: string = '';
+  filter: string = '';
+  filterColumn: string = '';
   page: number = 1;
   itemsPerPage: Array<number> = [5,10,15,20,30,50];
-  selectedItemsPerPage: number = 5;
+  selectedItemsPerPage: number = 10;
   mainCheck = false;
   myBackupSortingArray =[];
   noSelectCheckboxes = 0;
@@ -45,6 +28,9 @@ export class ReactiveTableComponent implements OnInit {
   tableEntriesCount = 0;
   sortingDirection = '';
   sortingHeader = '';
+
+  filterArray: Array<any> =[];
+
   @Input() columns: Array<string> = [];
   @Output() newRow: EventEmitter<string> = new EventEmitter<string>();
 
@@ -56,11 +42,14 @@ export class ReactiveTableComponent implements OnInit {
   ngOnInit() {
     this.initiateForm();
 
+    for (let i = 0; i < this.columns.length; i++){
+      this.filterArray.push({
+        column: this.columns[i],
+        value: ''});}
   }
 
   initiateForm(){
-    // TO DO!!!!!!!!!!!!!!!!!!!!11
-    this.httpService.getData(this.searchText,this.sortingDirection, this.sortingHeader, this.page, this.selectedItemsPerPage).subscribe(
+    this.httpService.getData(this.filter,this.filterColumn,this.sortingDirection, this.sortingHeader, this.page, this.selectedItemsPerPage).subscribe(
       (value: any) => {
         this.tableEntriesCount = value.itemsCount;
         console.log("sorting:" + this.sortingDirection);
@@ -308,6 +297,30 @@ export class ReactiveTableComponent implements OnInit {
     else return true;
     // console.log(group);
     // return this.getFormControls.controls[index].get("Company"); }
+  }
 
+  search(column:string, value: string){
+    console.log(column);
+    this.filter = value;
+    this.filterColumn = column;
+    this.initiateForm();
+  }
+
+  checkTextArea(column:string, value: string){
+    if (value === '') {
+      this.search(column, value);
+    }
+  }
+
+  resetSearchFilter(){
+    this.filterArray = [];
+    for (let i = 0; i < this.columns.length; i++){
+      this.filterArray.push({
+        column: this.columns[i],
+        value: ''});
+    }
+    this.filter = '';
+    this.filterColumn = '';
+    this.initiateForm();
   }
 }
