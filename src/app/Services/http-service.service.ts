@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map } from 'rxjs/operators'
 import { PutDTO, PostDTO } from '../Interfaces/interface';
 
 
@@ -23,8 +22,6 @@ export class HttpService {
       .set('sortHeader', sortHeader)
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString())
-
-
     });
   }
 

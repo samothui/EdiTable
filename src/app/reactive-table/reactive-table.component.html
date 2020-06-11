@@ -7,15 +7,12 @@
 
 
 <div class="overTable">
-
-
     <div class="actionContainer">
       <button type="button" class="btn" (click)="addRow()">Add row</button>
       <button type="button" class="btn" *ngIf="!checkIfNoCheckbox()" (click)="clearSelection()">Clear Selection</button>
       <button type="button" class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()" (click)="editSelectedRows()">Batch edit</button>
       <button type="button" class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()"(click)="deleteSelectedRows()">Batch delete</button>
       <button type="button" class="btn" (click)="resetSearchFilter()" [disabled]="filter===''">Reset search</button>
-
     </div>
 </div>
 
@@ -28,26 +25,23 @@
   </colgroup>
   <thead>
     <tr class="table-title">
-
       <th class="arrowAble" [attr.colspan]="first ? '2': '1'" *ngFor="let column of columns; let first=first" sortable="{{column}}" (sort)="onSort($event)">{{column}}</th>
       <!-- BUG - nu se pune arrow - din cauza sortable="{{column}}" - sortable="Company" e ok -->
       <th class="xsm"><div class="checkboxWrapper"><input type="checkbox" (change)="checkAllBoxes()" [(ngModel)]=mainCheck [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()" id="mainBox"><label id="mainLabel" for="mainBox"></label></div></th>
-
     </tr>
+
     <tr>
       <th [attr.colspan]="first || last ? '2': '1'" *ngFor="let column of columns; let first=first; let last=last; let i=index">
         <div class="searchForm">
-          <!-- <input (keydown.enter)="search(column, $event.target.value)" (input)="checkTextArea(column, $event.target.value)" class="inlineInput searchInput"> -->
           <input class="inlineInput searchInput" (keydown.enter)="search(filterArray[i].column,filterArray[i].value)" [(ngModel)]="filterArray[i].value" (ngModelChange)="checkTextArea(filterArray[i].column, filterArray[i].value)" [ngModelOptions]="{standalone: true}">
-
         </div>
 
       </th>
     </tr>
   </thead>
+
   <tbody>
     <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page, totalItems: tableEntriesCount} ; let i=index">
-
       <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
         <td class="sm">
           <button type="button" class="icoBtn done"(click)="doneRow(group, i)"></button>
@@ -72,8 +66,7 @@
 
         <td><div class="checkboxWrapper"><input type="checkbox" id="box-{{i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{i}}"></label></div></td>
 
-
-        <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
+      <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
 
         <td class="sm">
           <div class="icoBtnWrapper">
@@ -100,12 +93,12 @@
             <input type="checkbox" formControlName="Checked" id="box-{{(page-1)*selectedItemsPerPage+i}}" (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label></div>
         </td>
 
-
       </tr>
     </ng-container>
   </tbody>
 </table>
 </form>
+
 <div class="underTable">
   <div class="leftUnderTable">
     <span>{{tableEntriesCount}} total entries</span>

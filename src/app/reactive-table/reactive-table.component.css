@@ -8,7 +8,7 @@
 }
 
 table {
-  line-height: 1.5em;
+  line-height: 1.2em;
   table-layout: fixed;
   width: 100%;
   border-collapse: collapse;
@@ -18,7 +18,7 @@ table {
 td, th {
   border: 1px solid #dddddd;
   text-align: center;
-  padding: 0.7em;
+  padding: 0.5em;
 }
 
 tr:nth-child(even) {
@@ -76,9 +76,9 @@ th[sortable].desc:after {
   background-color: inherit;
   border: none;
   display: inline-block;
-  background-size: 1.2em;
-  width: 1.5em;
-  height: 1.9em;
+  background-size: 1em;
+  width: 1.2em;
+  height: 1.5em;
   vertical-align: middle;
   margin-left: 0.5em;
   margin-right: 0.5em;
@@ -196,15 +196,14 @@ input[type="checkbox"]:disabled + #mainLabel:before{
 }
 
 .overTable{
-  align-items: center;
+  /* align-items: center; */
   padding: 0.5em 1em;
-  line-height: 2em;
   position: sticky;
   top: -1px;
   z-index: 2;
   background-color: white;
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
 }
 
 .actionContainer{
@@ -224,7 +223,7 @@ input[type="checkbox"]:disabled + #mainLabel:before{
   background-size: 1rem;
   background-color: white;
   background-position: 10px center;
-  padding: 0.2rem 0.2rem 0.2rem 2.5rem;
+  padding: 0.2rem 0.2rem 0.2rem 2rem;
   -webkit-transition: width 0.4s ease-in-out;
   transition: width 0.4s ease-in-out;
   font-weight: 500;

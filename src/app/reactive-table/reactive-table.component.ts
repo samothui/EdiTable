@@ -52,8 +52,8 @@ export class ReactiveTableComponent implements OnInit {
     this.httpService.getData(this.filter,this.filterColumn,this.sortingDirection, this.sortingHeader, this.page, this.selectedItemsPerPage).subscribe(
       (value: any) => {
         this.tableEntriesCount = value.itemsCount;
-        console.log("sorting:" + this.sortingDirection);
-        console.log("column:" + this.sortingHeader);
+        console.log("Sorting direction: " + this.sortingDirection);
+        console.log("Sorting column: " + this.sortingHeader);
         this.tableValues = [];
         value.tableValuesDTOs.forEach(el => this.tableValues.push(el))
         this.touchedRows = [];
@@ -105,16 +105,10 @@ export class ReactiveTableComponent implements OnInit {
     this.newRow.emit("Acesta este randul meu");
   }
 
-  // deleteRow(index: number) {
-  //   const control =  this.userTable.get('tableRows') as FormArray;
-  //   console.log(control.controls[index].value.Id)
-  //   // control.removeAt(index);
-  // }
-
   deleteRow(index: number) {
     const control =  this.userTable.get('tableRows') as FormArray;
     const delId = control.controls[index].value.Id;
-    this.httpService.deleteRow(delId).subscribe(console.log);
+    this.httpService.deleteRow(delId).subscribe();
     control.removeAt(index);
     this.tableEntriesCount-- ;
   }
@@ -130,7 +124,6 @@ export class ReactiveTableComponent implements OnInit {
       } else {
         this.addEntryDB(group)
       }
-
     } else alert ("The row you are trying to edit contains invalid values");
   }
 
@@ -160,25 +153,20 @@ export class ReactiveTableComponent implements OnInit {
       });
   }
 
-  saveUserDetails() {
-    console.log(this.userTable.value);
-  }
-
   get getFormControls() {
     const control = this.userTable.get('tableRows') as FormArray;
     return control;
   }
 
-  submitForm() {
-    if(confirm("You are about to submit changed data to DB! Are you sure?")){
-      const control = this.userTable.get('tableRows') as FormArray;
-      this.touchedRows = control.controls
-      .filter(row => row.touched)
-      .map(row => row.value);
-      console.log(this.touchedRows);
-    }
-
-  }
+  // submitForm() {
+  //   if(confirm("You are about to submit changed data to DB! Are you sure?")){
+  //     const control = this.userTable.get('tableRows') as FormArray;
+  //     this.touchedRows = control.controls
+  //     .filter(row => row.touched)
+  //     .map(row => row.value);
+  //     console.log(this.touchedRows);
+  //   }
+  // }
 
   deleteSelectedRows(){
     for (let i = this.getFormControls.value.length-1 ; i >= 0; i--) {
@@ -242,16 +230,6 @@ export class ReactiveTableComponent implements OnInit {
     });
 
     this.initiateForm();
-
-    // let myArray = this.getFormControls.value;
-    // myArray = [...myArray].sort((a, b) => {
-    //   const res = compare(a[column], b[column]);
-    //   return direction === 'asc' ? res : -res;
-    // });
-    // this.getFormControls.patchValue(myArray);
-    // if (direction === "") {
-    //   this.getFormControls.patchValue(this.myBackupSortingArray);
-    // }
   }
 
   // Workaround for "position: sticky" theoretical state of 'stuck'
@@ -295,12 +273,11 @@ export class ReactiveTableComponent implements OnInit {
     if (controlToCheck.invalid && (controlToCheck.dirty || controlToCheck.touched))
     {return false;}
     else return true;
-    // console.log(group);
-    // return this.getFormControls.controls[index].get("Company"); }
   }
 
   search(column:string, value: string){
-    console.log(column);
+    // FUTURE FEATURE: search by 2 values using filterArray
+    console.log("Searched column: " + column);
     this.filter = value;
     this.filterColumn = column;
     this.initiateForm();
