@@ -1,1 +1,35 @@
-<app-reactive-table [columns]="columns" (newRow)="doSomething($event)"></app-reactive-table>
+<app-reactive-table
+    [columns]="columns"
+    (deleteRowChange)="deleteRow($event)"
+    (editRowChange)="editRow($event)"
+    (addRowChange)="addRow($event)"
+    (initiateFormChange)="initiateForm($event)"
+
+    [itemsPerPage] = "itemsPerPage"
+    [selectedItemsPerPage] = "selectedItemsPerPage"
+    [isEditable] = "isEditable"
+    [isDeleteable] = "isDeleteable"
+    [isSelectable] = "isSelectable"
+    [isSearchable] = "isSearchable"
+    [isSortable] = "isSortable"
+
+    [newRow] = "form"
+
+    [idReceiver]="idReceivedChange"
+    [valuesReceiver]="valuesChange"
+    >
+</app-reactive-table>
+
+
+<div style="position: absolute; bottom: 3em; display: inline-flex; width: 100%; justify-content: center; ">
+  Editable?
+  <button [style.background-color]="isEditable ? 'green' : 'red'" (click)="isEditable = !isEditable">{{isEditable}}</button>
+  Deleteable?
+  <button [style.background-color]="isDeleteable ? 'green' : 'red'" (click)="isDeleteable = !isDeleteable">{{isDeleteable}}</button>
+  Selectable?
+  <button [style.background-color]="isSelectable ? 'green' : 'red'" (click)="isSelectable = !isSelectable">{{isSelectable}}</button>
+  Searchable?
+  <button [style.background-color]="isSearchable ? 'green' : 'red'" (click)="isSearchable = !isSearchable">{{isSearchable}}</button>
+  Sortable?
+  <button [style.background-color]="isSortable ? 'green' : 'red'" (click)="isSortable = !isSortable">{{isSortable}}</button>
+</div>

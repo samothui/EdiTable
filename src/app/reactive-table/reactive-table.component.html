@@ -8,11 +8,11 @@
 
 <div class="overTable">
     <div class="actionContainer">
-      <button type="button" class="btn" (click)="addRow()">Add row</button>
-      <button type="button" class="btn" *ngIf="!checkIfNoCheckbox()" (click)="clearSelection()">Clear Selection</button>
-      <button type="button" class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()" (click)="editSelectedRows()">Batch edit</button>
-      <button type="button" class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()"(click)="deleteSelectedRows()">Batch delete</button>
-      <button type="button" class="btn" (click)="resetSearchFilter()" [disabled]="filter===''">Reset search</button>
+      <button *ngIf="isEditable || isDeleteable" type="button" class="btn" (click)="addRow()">Add row</button>
+      <button *ngIf="isSelectable && !checkIfNoCheckbox()" type="button" class="btn" (click)="clearSelection()">Clear Selection</button>
+      <button *ngIf="isEditable && isSelectable" type="button" class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()" (click)="editSelectedRows()">Batch edit</button>
+      <button *ngIf="isDeleteable && isSelectable" type="button" class="btn" [disabled]="checkIfEmptyTable() || checkIfNoCheckbox()"(click)="deleteSelectedRows()">Batch delete</button>
+      <button *ngIf="isSearchable" type="button" class="btn" (click)="resetSearchFilter()" [disabled]="filter===''">Reset search</button>
     </div>
 </div>
 
@@ -21,17 +21,21 @@
 
 <table>
   <colgroup>
-    <col span="1" class="sm">
+    <col *ngIf="isEditable || isDeleteable" span="1" class="sm">
   </colgroup>
   <thead>
     <tr class="table-title">
-      <th class="arrowAble" [attr.colspan]="first ? '2': '1'" *ngFor="let column of columns; let first=first" sortable="{{column}}" (sort)="onSort($event)">{{column}}</th>
-      <!-- BUG - nu se pune arrow - din cauza sortable="{{column}}" - sortable="Company" e ok -->
-      <th class="xsm"><div class="checkboxWrapper"><input type="checkbox" (change)="checkAllBoxes()" [(ngModel)]=mainCheck [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()" id="mainBox"><label id="mainLabel" for="mainBox"></label></div></th>
+      <ng-container  *ngFor="let column of columns; let first=first">
+        <th *ngIf="!isSortable" [attr.colspan]="first && (isEditable || isDeleteable)? '2': '1'">{{column}}</th>
+        <th *ngIf="isSortable" class="arrowAble" [attr.colspan]="first && (isEditable || isDeleteable)? '2': '1'" sortable="{{column}}" (sort)="onSort($event)">{{column}}</th>
+        <!-- BUG - nu se pune arrow - din cauza sortable="{{column}}" - sortable="Company" e ok -->
+      </ng-container>
+
+      <th *ngIf="isSelectable" class="xsm"><div class="checkboxWrapper"><input type="checkbox" (change)="checkAllBoxes()" [(ngModel)]=mainCheck [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()" id="mainBox"><label id="mainLabel" for="mainBox"></label></div></th>
     </tr>
 
-    <tr>
-      <th [attr.colspan]="first || last ? '2': '1'" *ngFor="let column of columns; let first=first; let last=last; let i=index">
+    <tr *ngIf="isSearchable">
+      <th [attr.colspan]="(first && (isEditable || isDeleteable)) || (last && isSelectable) ? '2': '1'" *ngFor="let column of columns; let first=first; let last=last; let i=index">
         <div class="searchForm">
           <input class="inlineInput searchInput" (keydown.enter)="search(filterArray[i].column,filterArray[i].value)" [(ngModel)]="filterArray[i].value" (ngModelChange)="checkTextArea(filterArray[i].column, filterArray[i].value)" [ngModelOptions]="{standalone: true}">
         </div>
@@ -43,8 +47,8 @@
   <tbody>
     <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page, totalItems: tableEntriesCount} ; let i=index">
       <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
-        <td class="sm">
-          <button type="button" class="icoBtn done"(click)="doneRow(group, i)"></button>
+        <td *ngIf="isEditable || isDeleteable" class="sm">
+          <button *ngIf="isEditable || isDeleteable" type="button" class="icoBtn done"(click)="doneRow(group, i)"></button>
 
         </td>
 
@@ -64,14 +68,14 @@
           <div *ngIf="!isValid(group, 'Country')" class="invalidError">Country name is invalid</div>
         </td>
 
-        <td><div class="checkboxWrapper"><input type="checkbox" id="box-{{i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{i}}"></label></div></td>
+        <td *ngIf="isSelectable"><div class="checkboxWrapper"><input type="checkbox" id="box-{{i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{i}}"></label></div></td>
 
       <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
 
-        <td class="sm">
+        <td *ngIf="isEditable || isDeleteable" class="sm">
           <div class="icoBtnWrapper">
-            <button type="button" class="icoBtn edit"(click)="editRow(group)"></button>
-            <button type="button"  class="icoBtn del" (click)="deleteRow(i)"></button>
+            <button *ngIf="isEditable" type="button" class="icoBtn edit"(click)="editRow(group)"></button>
+            <button *ngIf="isDeleteable" type="button"  class="icoBtn del" (click)="deleteRow(i)"></button>
           </div>
         </td>
 
@@ -88,7 +92,7 @@
           {{group.get('Country').value}}
         </td>
 
-        <td>
+        <td *ngIf="isSelectable">
           <div class="checkboxWrapper">
             <input type="checkbox" formControlName="Checked" id="box-{{(page-1)*selectedItemsPerPage+i}}" (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label></div>
         </td>
@@ -111,7 +115,7 @@
   </div>
 
   <div class="rightUnderTable">
-    <select #itemsPage type="number" (change)="onOptionSelect()" [(ngModel)]="selectedItemsPerPage" [ngModelOptions]="{standalone: true}">
+    <select type="number" (change)="onOptionSelect()" [(ngModel)]="selectedItemsPerPage" [ngModelOptions]="{standalone: true}">
       <option class="dropdown" *ngFor="let item of itemsPerPage" [ngValue]="item">{{item}} items per page</option>
     </select>
   </div>

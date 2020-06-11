@@ -1,6 +1,6 @@
 import { Component, OnInit, QueryList, ViewChildren, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { SortEvent, compare, PutDTO, PostDTO } from '../Interfaces/interface';
+import { SortEvent, PutDTO, PostDTO } from '../Interfaces/interface';
 import { SortableHeaderDirective } from '../Directives/sortable-header.directive';
 import { HttpService } from '../Services/http-service.service';
 
@@ -13,34 +13,50 @@ export class ReactiveTableComponent implements OnInit {
 
   userTable: FormGroup;
   control: FormArray;
-  mode: boolean;
-  touchedRows: any;
+  // mode: boolean;
+  // touchedRows: any;
+    // myBackupSortingArray =[];
   tableValues = [];
   filter: string = '';
   filterColumn: string = '';
   page: number = 1;
-  itemsPerPage: Array<number> = [5,10,15,20,30,50];
-  selectedItemsPerPage: number = 10;
   mainCheck = false;
-  myBackupSortingArray =[];
   noSelectCheckboxes = 0;
   contentLoaded = false;
-  tableEntriesCount = 0;
-  sortingDirection = '';
-  sortingHeader = '';
 
   filterArray: Array<any> =[];
 
+  tableEntriesCount = 0; //MAYBE
+  sortingDirection = ''; //MAYBE
+  sortingHeader = ''; //MAYBE
+  @Input() itemsPerPage: Array<number> = [];
+  @Input() selectedItemsPerPage: number;
   @Input() columns: Array<string> = [];
-  @Output() newRow: EventEmitter<string> = new EventEmitter<string>();
+  @Input() isEditable: boolean = true;
+  @Input() isDeleteable: boolean = true;
+  @Input() isSelectable: boolean = true;
+  @Input() isSearchable: boolean = true;
+  @Input() isSortable: boolean = true;
+
+  @Input() newRow;
+
+  @Output() addRowChange: EventEmitter<any> = new EventEmitter<any>();
+  @Output() deleteRowChange: EventEmitter<number> = new EventEmitter<number>();
+
+  @Output() initiateFormChange: EventEmitter<any> = new EventEmitter<any>();
+
 
   constructor(
     private fb: FormBuilder,
     private httpService: HttpService
              ) { }
 
+  @Input() private idReceiver: EventEmitter<any>;
+  @Input() private valuesReceiver: EventEmitter<any>;
+
   ngOnInit() {
     this.initiateForm();
+
 
     for (let i = 0; i < this.columns.length; i++){
       this.filterArray.push({
@@ -49,66 +65,81 @@ export class ReactiveTableComponent implements OnInit {
   }
 
   initiateForm(){
-    this.httpService.getData(this.filter,this.filterColumn,this.sortingDirection, this.sortingHeader, this.page, this.selectedItemsPerPage).subscribe(
-      (value: any) => {
+    this.valuesReceiver.subscribe((value: any)=>{
         this.tableEntriesCount = value.itemsCount;
         console.log("Sorting direction: " + this.sortingDirection);
         console.log("Sorting column: " + this.sortingHeader);
         this.tableValues = [];
         value.tableValuesDTOs.forEach(el => this.tableValues.push(el))
-        this.touchedRows = [];
         this.userTable = this.fb.group({
           tableRows: this.fb.array([])
         });
         this.addDefaultValues();
         this.checkAll();
 
-        this.myBackupSortingArray = this.getFormControls.value;
 
         this.contentLoaded = true;
         this.defineStuckState();
+    })
 
-      });
+    this.initiateFormChange.emit({
+      filter: this.filter,
+      filterColumn: this.filterColumn,
+      sortingDirection: this.sortingDirection,
+      sortingHeader: this.sortingHeader,
+      currentPage: this.page,
+      selectedItemsPerPage: this.selectedItemsPerPage})
+
+
+    // this.httpService.getData(this.filter,this.filterColumn,this.sortingDirection, this.sortingHeader, this.page, this.selectedItemsPerPage).subscribe(
+    //   (value: any) => {
+    //     this.tableEntriesCount = value.itemsCount;
+    //     console.log("Sorting direction: " + this.sortingDirection);
+    //     console.log("Sorting column: " + this.sortingHeader);
+    //     this.tableValues = [];
+    //     value.tableValuesDTOs.forEach(el => this.tableValues.push(el))
+    //     // this.touchedRows = [];
+    //     this.userTable = this.fb.group({
+    //       tableRows: this.fb.array([])
+    //     });
+    //     this.addDefaultValues();
+    //     this.checkAll();
+
+
+    //     this.contentLoaded = true;
+    //     this.defineStuckState();
+
+    //   });
   }
 
   addDefaultValues(){
     const control =  this.userTable.get('tableRows') as FormArray;
+
     for (let i = 0; i < this.tableValues.length; i ++){
       control.push(this.fb.group({
         Id: [this.tableValues[i].id],
         Company: [this.tableValues[i].company, [Validators.required, Validators.minLength(3)]],
         Contact: [this.tableValues[i].contact, [Validators.required, Validators.minLength(3)]],
-        Country: [this.tableValues[i].country, [Validators.required, Validators.minLength(3)]],
+        Country: [this.tableValues[i].country, [Validators.required, Validators.minLength(2)]],
         isEditable: false,
         Checked: false,
         }));
     }
   }
 
+
   addRow() {
     const control =  this.userTable.get('tableRows') as FormArray;
-    control.push(this.fb.group({
-      Id: [],
-      Company: ['',
-      [Validators.required,
-      Validators.minLength(3)]],
-      Contact: ['',
-      [Validators.required,
-      Validators.minLength(3)]],
-      Country: ['',
-      [Validators.required,
-      Validators.minLength(2)]],
-      isEditable: [true],
-      Checked: [false]
-    }));
-
-    this.newRow.emit("Acesta este randul meu");
+    control.push(this.newRow);
+    // this.newRowChange.emit("New row added");
   }
 
   deleteRow(index: number) {
     const control =  this.userTable.get('tableRows') as FormArray;
     const delId = control.controls[index].value.Id;
-    this.httpService.deleteRow(delId).subscribe();
+
+    this.deleteRowChange.emit(delId);
+
     control.removeAt(index);
     this.tableEntriesCount-- ;
   }
@@ -117,56 +148,38 @@ export class ReactiveTableComponent implements OnInit {
     group.get('isEditable').setValue(true);
   }
 
-  doneRow(group: FormGroup, index: number) {
+  doneRow(group: FormGroup) {
     if (group.get('isEditable').parent.status === "VALID") {
+      group.get('isEditable').setValue(false);
       if (group.value.Id !== null) {
-        this.editEntryDB(group, index);
+        this.editEntryDB(group);
       } else {
         this.addEntryDB(group)
       }
     } else alert ("The row you are trying to edit contains invalid values");
   }
 
-  editEntryDB(group: FormGroup, index: number){
-    group.get('isEditable').setValue(false);
-    const control =  this.userTable.get('tableRows') as FormArray;
-    const editId = control.controls[index].value.Id;
-    const tableEntry: PutDTO = {
-      id: group.value.Id,
-      company: group.value.Company,
-      contact: group.value.Contact,
-      country: group.value.Country
-    }
-    this.httpService.editRow(editId, tableEntry).subscribe();
+  @Output() editRowChange = new EventEmitter<any>();
+
+  editEntryDB(group: FormGroup){
+    this.editRowChange.emit(group);
   }
 
   addEntryDB(group: FormGroup){
-      group.get('isEditable').setValue(false);
-      const tableEntry: PostDTO = {
-        company: group.value.Company,
-        contact: group.value.Contact,
-        country: group.value.Country
-      }
-      this.httpService.postRow(tableEntry).subscribe((value:any) =>{
-        group.get('Id').setValue(value.id);
-        this.tableEntriesCount++;
-      });
+    let idReceived: number;
+    this.idReceiver.subscribe((value)=> {
+      idReceived = value
+      group.get('Id').setValue(idReceived);
+      this.tableEntriesCount++;
+
+    })
+    this.addRowChange.emit(group);
   }
 
   get getFormControls() {
     const control = this.userTable.get('tableRows') as FormArray;
     return control;
   }
-
-  // submitForm() {
-  //   if(confirm("You are about to submit changed data to DB! Are you sure?")){
-  //     const control = this.userTable.get('tableRows') as FormArray;
-  //     this.touchedRows = control.controls
-  //     .filter(row => row.touched)
-  //     .map(row => row.value);
-  //     console.log(this.touchedRows);
-  //   }
-  // }
 
   deleteSelectedRows(){
     for (let i = this.getFormControls.value.length-1 ; i >= 0; i--) {
@@ -183,7 +196,7 @@ export class ReactiveTableComponent implements OnInit {
       if (this.getFormControls.value[i].Checked && !this.getFormControls.value[i].isEditable){
         this.editRow(form);
       } else if (this.getFormControls.value[i].Checked && this.getFormControls.value[i].isEditable){
-        this.doneRow(form, i);
+        this.doneRow(form);
       }
     }
   }
