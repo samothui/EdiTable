@@ -4,6 +4,7 @@
     (editRowChange)="editRow($event)"
     (addRowChange)="addRow($event)"
     (initiateFormChange)="initiateForm($event)"
+    (rowClickedChange)="rowClicked($event)"
 
     [itemsPerPage] = "itemsPerPage"
     [selectedItemsPerPage] = "selectedItemsPerPage"
@@ -13,15 +14,23 @@
     [isSearchable] = "isSearchable"
     [isSortable] = "isSortable"
 
-    [newRow] = "form"
+    [tableEntriesCount]="tableEntriesCount"
+
+    [newRow] = "tableEntryTemplate"
+    (newRowChange)="newRow()"
 
     [idReceiver]="idReceivedChange"
     [valuesReceiver]="valuesChange"
+    [formArray]="formArrayChange"
     >
 </app-reactive-table>
 
+    <!-- NG ON CHANGES
+    [data]="data"
+    (onRefresh)="onRefresh()"
+  -->
 
-<div style="position: absolute; bottom: 3em; display: inline-flex; width: 100%; justify-content: center; ">
+<div style="position: sticky; z-index: 10; background-color: wheat; bottom: 3em; display: inline-flex; width: 100%; justify-content: center; ">
   Editable?
   <button [style.background-color]="isEditable ? 'green' : 'red'" (click)="isEditable = !isEditable">{{isEditable}}</button>
   Deleteable?

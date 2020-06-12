@@ -1,11 +1,11 @@
-<div    *ngIf="contentLoaded"  class="componentWrapper">
+<div *ngIf="contentLoaded"  class="componentWrapper">
 <header>
   <div>
     <h1>Inline Editable Table</h1>
   </div>
 </header>
 
-
+<!--  TABLE UPPER BAR  -->
 <div class="overTable">
     <div class="actionContainer">
       <button *ngIf="isEditable || isDeleteable" type="button" class="btn" (click)="addRow()">Add row</button>
@@ -16,92 +16,80 @@
     </div>
 </div>
 
+<!--  TABLE  -->
 
 <form [formGroup]="userTable">
 
-<table>
-  <colgroup>
-    <col *ngIf="isEditable || isDeleteable" span="1" class="sm">
-  </colgroup>
-  <thead>
-    <tr class="table-title">
-      <ng-container  *ngFor="let column of columns; let first=first">
-        <th *ngIf="!isSortable" [attr.colspan]="first && (isEditable || isDeleteable)? '2': '1'">{{column}}</th>
-        <th *ngIf="isSortable" class="arrowAble" [attr.colspan]="first && (isEditable || isDeleteable)? '2': '1'" sortable="{{column}}" (sort)="onSort($event)">{{column}}</th>
-        <!-- BUG - nu se pune arrow - din cauza sortable="{{column}}" - sortable="Company" e ok -->
-      </ng-container>
+  <table>
+    <colgroup>
+      <col *ngIf="isEditable || isDeleteable" span="1" class="sm">
+    </colgroup>
+    <!--  TABLE HEAD -->
+
+    <thead>
+      <tr class="table-title">
+        <ng-container  *ngFor="let column of columns; let first=first">
+          <th *ngIf="!isSortable" [attr.colspan]="first && (isEditable || isDeleteable)? '2': '1'">{{column}}</th>
+          <th *ngIf="isSortable" class="arrowAble" [attr.colspan]="first && (isEditable || isDeleteable)? '2': '1'" sortable="{{column}}" (sort)="onSort($event)">{{column}}</th>
+          <!-- BUG - nu se pune arrow - din cauza sortable="{{column}}" - sortable="Company" e ok -->
+        </ng-container>
 
       <th *ngIf="isSelectable" class="xsm"><div class="checkboxWrapper"><input type="checkbox" (change)="checkAllBoxes()" [(ngModel)]=mainCheck [ngModelOptions]="{standalone: true}" [disabled]="checkIfEmptyTable()" id="mainBox"><label id="mainLabel" for="mainBox"></label></div></th>
-    </tr>
-
-    <tr *ngIf="isSearchable">
-      <th [attr.colspan]="(first && (isEditable || isDeleteable)) || (last && isSelectable) ? '2': '1'" *ngFor="let column of columns; let first=first; let last=last; let i=index">
-        <div class="searchForm">
-          <input class="inlineInput searchInput" (keydown.enter)="search(filterArray[i].column,filterArray[i].value)" [(ngModel)]="filterArray[i].value" (ngModelChange)="checkTextArea(filterArray[i].column, filterArray[i].value)" [ngModelOptions]="{standalone: true}">
-        </div>
-
-      </th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page, totalItems: tableEntriesCount} ; let i=index">
-      <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
-        <td *ngIf="isEditable || isDeleteable" class="sm">
-          <button *ngIf="isEditable || isDeleteable" type="button" class="icoBtn done"(click)="doneRow(group, i)"></button>
-
-        </td>
-
-        <td>
-
-          <input class="inlineInput" type="text" formControlName="Company">
-            <div *ngIf="!isValid(group, 'Company')" class="invalidError">Company name is invalid</div>
-        </td>
-
-        <td>
-          <input class="inlineInput" type="text" formControlName="Contact">
-          <div *ngIf="!isValid(group, 'Contact')" class="invalidError">Contact name is invalid</div>
-        </td>
-
-        <td>
-          <input class="inlineInput" type="text" formControlName="Country">
-          <div *ngIf="!isValid(group, 'Country')" class="invalidError">Country name is invalid</div>
-        </td>
-
-        <td *ngIf="isSelectable"><div class="checkboxWrapper"><input type="checkbox" id="box-{{i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{i}}"></label></div></td>
-
-      <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
-
-        <td *ngIf="isEditable || isDeleteable" class="sm">
-          <div class="icoBtnWrapper">
-            <button *ngIf="isEditable" type="button" class="icoBtn edit"(click)="editRow(group)"></button>
-            <button *ngIf="isDeleteable" type="button"  class="icoBtn del" (click)="deleteRow(i)"></button>
-          </div>
-        </td>
-
-        <td>
-
-          {{group.get('Company').value}}
-        </td>
-
-        <td>
-          {{group.get('Contact').value}}
-        </td>
-
-        <td>
-          {{group.get('Country').value}}
-        </td>
-
-        <td *ngIf="isSelectable">
-          <div class="checkboxWrapper">
-            <input type="checkbox" formControlName="Checked" id="box-{{(page-1)*selectedItemsPerPage+i}}" (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label></div>
-        </td>
-
       </tr>
-    </ng-container>
-  </tbody>
-</table>
+
+      <tr *ngIf="isSearchable">
+        <th [attr.colspan]="(first && (isEditable || isDeleteable)) || (last && isSelectable) ? '2': '1'" *ngFor="let column of columns; let first=first; let last=last; let i=index">
+          <div class="searchForm">
+            <input class="inlineInput searchInput" (keydown.enter)="search(filterArray[i].column,filterArray[i].value)" [(ngModel)]="filterArray[i].value" (ngModelChange)="checkTextArea(filterArray[i].column, filterArray[i].value)" [ngModelOptions]="{standalone: true}">
+          </div>
+
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls | paginate: {itemsPerPage: selectedItemsPerPage, currentPage: page, totalItems: tableEntriesCount} ; let i=index">
+    <!--  TABLE ROWS if EDITABLE -->
+
+        <tr class="row" *ngIf="group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}">
+          <td *ngIf="isEditable || isDeleteable" class="sm">
+            <button *ngIf="isEditable || isDeleteable" type="button" class="icoBtn done"(click)="doneRow(group, i)"></button>
+          </td>
+
+          <td *ngFor="let name of columns">
+            <input class="inlineInput" type="text" formControlName="{{name}}">
+              <div *ngIf="!isValid(group, name)" class="invalidError">{{name}} name is invalid</div>
+          </td>
+
+          <td *ngIf="isSelectable"><div class="checkboxWrapper"><input type="checkbox" id="box-{{i}}" formControlName="Checked" (change)="checkAll()"><label for="box-{{i}}"></label></div></td>
+
+      <!--  TABLE ROWS if NOT EDITABLE -->
+
+        <tr class="row" *ngIf="!group.get('isEditable').value" [formGroupName]="i" [ngClass]="{'highlight': group.get('Checked').value===true}" (click)="emitRow(group.value)">
+
+          <td *ngIf="isEditable || isDeleteable" class="sm">
+            <div class="icoBtnWrapper">
+              <button *ngIf="isEditable" type="button" class="icoBtn edit"(click)="editRow(group)"></button>
+              <button *ngIf="isDeleteable" type="button"  class="icoBtn del" (click)="deleteRow(i)"></button>
+            </div>
+          </td>
+
+            <td *ngFor="let name of columns">
+              {{group.get(name).value}}
+
+          <td *ngIf="isSelectable">
+            <div class="checkboxWrapper">
+              <input type="checkbox" formControlName="Checked" id="box-{{(page-1)*selectedItemsPerPage+i}}" (change)="checkAll()"><label for="box-{{(page-1)*selectedItemsPerPage+i}}"></label></div>
+          </td>
+
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
 </form>
+
+
+<!--  TABLE LOWER BAR  -->
 
 <div class="underTable">
   <div class="leftUnderTable">

@@ -1,8 +1,14 @@
-import { Component, OnInit, QueryList, ViewChildren, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChildren, Input, Output, EventEmitter, SimpleChange, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { SortEvent, PutDTO, PostDTO } from '../Interfaces/interface';
 import { SortableHeaderDirective } from '../Directives/sortable-header.directive';
-import { HttpService } from '../Services/http-service.service';
+
+export interface SortEvent {
+  column: string;
+  direction: SortDirection;
+}
+
+export type SortDirection = 'asc' | 'desc' | '';
+
 
 @Component({
   selector: 'app-reactive-table',
@@ -13,9 +19,6 @@ export class ReactiveTableComponent implements OnInit {
 
   userTable: FormGroup;
   control: FormArray;
-  // mode: boolean;
-  // touchedRows: any;
-    // myBackupSortingArray =[];
   tableValues = [];
   filter: string = '';
   filterColumn: string = '';
@@ -24,11 +27,12 @@ export class ReactiveTableComponent implements OnInit {
   noSelectCheckboxes = 0;
   contentLoaded = false;
 
-  filterArray: Array<any> =[];
+  filterArray: Array<any> = [];
 
-  tableEntriesCount = 0; //MAYBE
-  sortingDirection = ''; //MAYBE
-  sortingHeader = ''; //MAYBE
+  sortingDirection = '';
+  sortingHeader = '';
+
+  @Input() tableEntriesCount = 0;
   @Input() itemsPerPage: Array<number> = [];
   @Input() selectedItemsPerPage: number;
   @Input() columns: Array<string> = [];
@@ -37,22 +41,27 @@ export class ReactiveTableComponent implements OnInit {
   @Input() isSelectable: boolean = true;
   @Input() isSearchable: boolean = true;
   @Input() isSortable: boolean = true;
-
+  @Input() formArray = new EventEmitter<any>();
   @Input() newRow;
+  @Input() idReceiver: EventEmitter<any>;
+  @Input() valuesReceiver: EventEmitter<any>;
 
   @Output() addRowChange: EventEmitter<any> = new EventEmitter<any>();
   @Output() deleteRowChange: EventEmitter<number> = new EventEmitter<number>();
-
+  @Output() editRowChange = new EventEmitter<any>();
+  @Output() rowClickedChange: EventEmitter<any> = new EventEmitter<any>();
   @Output() initiateFormChange: EventEmitter<any> = new EventEmitter<any>();
+  @Output() newRowChange = new EventEmitter<any>();
 
+  get getFormControls() {
+    const control = this.userTable.get('tableRows') as FormArray;
+    return control;
+  }
 
   constructor(
     private fb: FormBuilder,
-    private httpService: HttpService
              ) { }
 
-  @Input() private idReceiver: EventEmitter<any>;
-  @Input() private valuesReceiver: EventEmitter<any>;
 
   ngOnInit() {
     this.initiateForm();
@@ -62,19 +71,47 @@ export class ReactiveTableComponent implements OnInit {
       this.filterArray.push({
         column: this.columns[i],
         value: ''});}
+
+  }
+
+  ngOnChanges(changes: SimpleChanges){
+    for (let propName in changes) {
+
+
+      let change = changes[propName];}
+    console.log(changes)
+
   }
 
   initiateForm(){
     this.valuesReceiver.subscribe((value: any)=>{
-        this.tableEntriesCount = value.itemsCount;
-        console.log("Sorting direction: " + this.sortingDirection);
-        console.log("Sorting column: " + this.sortingHeader);
-        this.tableValues = [];
-        value.tableValuesDTOs.forEach(el => this.tableValues.push(el))
+        // this.tableEntriesCount = value.itemsCount;
+        // console.log("Sorting direction: " + this.sortingDirection);
+        // console.log("Sorting column: " + this.sortingHeader);
+
+        // this.tableValues = [];
+        // value.tableValuesDTOs.forEach(el => this.tableValues.push(el))
+
+        // this.keyNames = Object.keys(this.tableValues[0]);
+        // this.keyNames = this.titleCaseArray(this.keyNames);
+        // this.keyNames = this.keyNames.slice(1);
+
+        // console.log(this.keyNames);
+
+
         this.userTable = this.fb.group({
           tableRows: this.fb.array([])
         });
-        this.addDefaultValues();
+
+        this.formArray.subscribe((array: Array<FormGroup>) => {
+
+          const control =  this.userTable.get('tableRows') as FormArray
+          control.clear();
+          array.forEach(value => control.push(value))
+
+        })
+
+        // this.addDefaultValues();
         this.checkAll();
 
 
@@ -89,35 +126,13 @@ export class ReactiveTableComponent implements OnInit {
       sortingHeader: this.sortingHeader,
       currentPage: this.page,
       selectedItemsPerPage: this.selectedItemsPerPage})
-
-
-    // this.httpService.getData(this.filter,this.filterColumn,this.sortingDirection, this.sortingHeader, this.page, this.selectedItemsPerPage).subscribe(
-    //   (value: any) => {
-    //     this.tableEntriesCount = value.itemsCount;
-    //     console.log("Sorting direction: " + this.sortingDirection);
-    //     console.log("Sorting column: " + this.sortingHeader);
-    //     this.tableValues = [];
-    //     value.tableValuesDTOs.forEach(el => this.tableValues.push(el))
-    //     // this.touchedRows = [];
-    //     this.userTable = this.fb.group({
-    //       tableRows: this.fb.array([])
-    //     });
-    //     this.addDefaultValues();
-    //     this.checkAll();
-
-
-    //     this.contentLoaded = true;
-    //     this.defineStuckState();
-
-    //   });
-  }
+   }
 
   addDefaultValues(){
     const control =  this.userTable.get('tableRows') as FormArray;
-
     for (let i = 0; i < this.tableValues.length; i ++){
       control.push(this.fb.group({
-        Id: [this.tableValues[i].id],
+        Id: this.tableValues[i].id,
         Company: [this.tableValues[i].company, [Validators.required, Validators.minLength(3)]],
         Contact: [this.tableValues[i].contact, [Validators.required, Validators.minLength(3)]],
         Country: [this.tableValues[i].country, [Validators.required, Validators.minLength(2)]],
@@ -127,11 +142,10 @@ export class ReactiveTableComponent implements OnInit {
     }
   }
 
-
   addRow() {
+    this.newRowChange.emit("New row added");
     const control =  this.userTable.get('tableRows') as FormArray;
     control.push(this.newRow);
-    // this.newRowChange.emit("New row added");
   }
 
   deleteRow(index: number) {
@@ -159,7 +173,6 @@ export class ReactiveTableComponent implements OnInit {
     } else alert ("The row you are trying to edit contains invalid values");
   }
 
-  @Output() editRowChange = new EventEmitter<any>();
 
   editEntryDB(group: FormGroup){
     this.editRowChange.emit(group);
@@ -174,11 +187,6 @@ export class ReactiveTableComponent implements OnInit {
 
     })
     this.addRowChange.emit(group);
-  }
-
-  get getFormControls() {
-    const control = this.userTable.get('tableRows') as FormArray;
-    return control;
   }
 
   deleteSelectedRows(){
@@ -223,7 +231,6 @@ export class ReactiveTableComponent implements OnInit {
   }
 
   checkIfNoCheckbox(){
-  // !! EFFICIENCY Problem: this fires way too many times
     this.noSelectCheckboxes = 0;
     this.getFormControls.value.map(val => {if (val.Checked === true) this.noSelectCheckboxes++;});
     if (this.noSelectCheckboxes >0 )return false;
@@ -312,5 +319,9 @@ export class ReactiveTableComponent implements OnInit {
     this.filter = '';
     this.filterColumn = '';
     this.initiateForm();
+  }
+
+  emitRow(rowValue: any){
+    this.rowClickedChange.emit(rowValue);
   }
 }
